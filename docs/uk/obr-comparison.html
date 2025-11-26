@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background: white;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .controls label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+        .controls select {
+            padding: 8px 12px;
+            border: 2px solid #319795;
+            background: white;
+            color: #374151;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 200px;
+        }
+        .controls select:focus {
+            outline: none;
+            border-color: #2C7A7B;
+        }
+        #chart {
+            width: 100%;
+            height: 350px;
+        }
+        #usage {
+            margin-top: 10px;
+            padding: 12px 16px;
+            background: #F9FAFB;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #4B5563;
+            line-height: 1.5;
+        }
+        #usage strong {
+            color: #374151;
+        }
+        #usage .example {
+            color: #319795;
+            font-weight: 500;
+        }
+        #usage .count {
+            color: #6B7280;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <label for="metric-select">Select metric:</label>
+        <select id="metric-select" onchange="showChart(this.value)">
+            <optgroup label="Inflation">
+                <option value="cpi" selected>CPI inflation</option>
+                <option value="rpi">RPI inflation</option>
+                <option value="cpih">CPIH inflation</option>
+            </optgroup>
+            <optgroup label="Labour market">
+                <option value="average_earnings">Average earnings</option>
+            </optgroup>
+            <optgroup label="Housing">
+                <option value="house_prices">House prices</option>
+                <option value="rent">Rent</option>
+                <option value="mortgage_interest">Mortgage interest</option>
+            </optgroup>
+        </select>
+    </div>
+    <div id="chart"></div>
+    <div id="usage"></div>
+
+    <script>
+        const years = [2025, 2026, 2027, 2028, 2029, 2030];
+        const baseEdition = 'march-2025';
+        const compEdition = 'november-2025';
+
+        const data = {
+    cpi: {
+        march_2025: [3.21, 2.08, 1.99, 2.00, 2.00, null],
+        november_2025: [3.45, 2.48, 2.02, 2.04, 2.04, 2.00],
+        title: 'CPI inflation (%)',
+        usage: '<strong>Used in PolicyEngine to uprate:</strong> <span class="example">Universal Credit, PIP, Child Benefit, State Pension</span> <span class="count">and 44 other benefits and consumption variables</span>. Also used for absolute poverty thresholds, triple lock calculations, and real-terms analysis.'
+    },
+    rpi: {
+        march_2025: [4.09, 3.23, 3.04, 2.85, 2.84, null],
+        november_2025: [4.33, 3.71, 3.13, 2.87, 2.90, 2.31],
+        title: 'RPI inflation (%)',
+        usage: '<strong>Used in PolicyEngine for:</strong> <span class="example">Private pension uprating</span> and fuel duty projections. RPI remains important for student loan interest rates and some legacy pension schemes.'
+    },
+    cpih: {
+        march_2025: [3.88, 2.50, 2.13, 2.05, 2.08, null],
+        november_2025: [3.93, 2.67, 2.15, 2.08, 2.11, 2.13],
+        title: 'CPIH inflation (%)',
+        usage: '<strong>Used in PolicyEngine for:</strong> <span class="example">After-housing-costs (AHC) deflator</span> calculations. CPIH includes owner occupiers\' housing costs, making it useful for real-terms comparisons that account for housing.'
+    },
+    average_earnings: {
+        march_2025: [4.32, 2.30, 2.06, 2.18, 2.48, null],
+        november_2025: [5.17, 3.33, 2.25, 2.10, 2.21, 2.32],
+        title: 'Average earnings growth (%)',
+        usage: '<strong>Used in PolicyEngine to uprate:</strong> <span class="example">Employment income, pension contributions, student loan repayments</span> <span class="count">(6 variables)</span>. Also used in triple lock calculations for State Pension.'
+    },
+    mortgage_interest: {
+        march_2025: [14.17, 13.25, 9.36, 4.76, 4.50, null],
+        november_2025: [10.98, 14.35, 10.32, 4.70, 4.66, 5.53],
+        title: 'Mortgage interest growth (%)',
+        usage: '<strong>Used in PolicyEngine to uprate:</strong> <span class="example">Mortgage interest repayments</span>. Affects housing cost projections for owner-occupiers with mortgages.'
+    },
+    rent: {
+        march_2025: [6.49, 3.89, 2.98, 2.27, 2.38, null],
+        november_2025: [5.46, 3.34, 3.11, 2.43, 2.34, 2.54],
+        title: 'Rent growth (%)',
+        usage: '<strong>Used in PolicyEngine to uprate:</strong> <span class="example">Private rent</span> for households in the private rented sector.'
+    },
+    house_prices: {
+        march_2025: [2.81, 2.47, 2.56, 2.48, 2.43, null],
+        november_2025: [2.94, 2.22, 2.79, 2.72, 2.57, 2.42],
+        title: 'House price growth (%)',
+        usage: '<strong>Used in PolicyEngine for:</strong> Stamp duty projections and property value calculations.'
+    },
+};
+
+        function showChart(metric) {
+            const d = data[metric];
+
+            // Filter out null values for base (which may have shorter series)
+            const baseKey = baseEdition.replace(/-/g, '_');
+            const compKey = compEdition.replace(/-/g, '_');
+
+            const baseYears = [];
+            const baseValues = [];
+            for (let i = 0; i < years.length; i++) {
+                if (d[baseKey][i] !== null) {
+                    baseYears.push(years[i]);
+                    baseValues.push(d[baseKey][i]);
+                }
+            }
+
+            const trace1 = {
+                x: baseYears,
+                y: baseValues,
+                name: baseEdition.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#9CA3AF', width: 2, dash: 'dash' },
+                marker: { size: 8 }
+            };
+
+            const trace2 = {
+                x: years,
+                y: d[compKey],
+                name: compEdition.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#319795', width: 3 },
+                marker: { size: 10 }
+            };
+
+            const layout = {
+                title: {
+                    text: d.title,
+                    font: {
+                        size: 18,
+                        color: '#374151',
+                        family: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }
+                },
+                xaxis: {
+                    tickmode: 'array',
+                    tickvals: years,
+                    ticktext: years.map(String),
+                    gridcolor: '#E5E7EB',
+                    tickfont: {
+                        family: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                        color: '#6B7280'
+                    }
+                },
+                yaxis: {
+                    range: [0, 16.0],
+                    gridcolor: '#E5E7EB',
+                    zeroline: true,
+                    zerolinecolor: '#9CA3AF',
+                    tickfont: {
+                        family: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                        color: '#6B7280'
+                    },
+                    ticksuffix: '%'
+                },
+                legend: {
+                    orientation: 'h',
+                    y: -0.15,
+                    x: 0.5,
+                    xanchor: 'center',
+                    font: {
+                        family: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                        color: '#374151'
+                    }
+                },
+                margin: { t: 50, b: 80, l: 50, r: 30 },
+                plot_bgcolor: 'white',
+                paper_bgcolor: 'white',
+                hovermode: 'x unified',
+                hoverlabel: {
+                    font: {
+                        family: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }
+                }
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: false
+            };
+
+            Plotly.newPlot('chart', [trace1, trace2], layout, config);
+
+            // Update usage text
+            document.getElementById('usage').innerHTML = d.usage;
+        }
+
+        // Initial chart
+        showChart('cpi');
+    </script>
+</body>
+</html>
