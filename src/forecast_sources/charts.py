@@ -72,6 +72,15 @@ METRICS = {
             "Stamp duty projections and property value calculations."
         ),
     },
+    "social_rent": {
+        "title": "Social rent growth (%)",
+        "usage": (
+            "<strong>Used in PolicyEngine to uprate:</strong> "
+            '<span class="example">Social housing rent</span>. '
+            "Derived from CPI + 1% with a one year lag, following the "
+            "government's social rent policy."
+        ),
+    },
 }
 
 
@@ -229,7 +238,8 @@ def generate_obr_comparison_chart(
             </optgroup>
             <optgroup label="Housing">
                 <option value="house_prices">House prices</option>
-                <option value="rent">Rent</option>
+                <option value="rent">Private rent</option>
+                <option value="social_rent">Social rent</option>
                 <option value="mortgage_interest">Mortgage interest</option>
             </optgroup>
         </select>

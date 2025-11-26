@@ -73,6 +73,8 @@ class OBRForecast:
         self._load_sheet_1_6(excel_path)
         # Load sheet 1.16 for house prices
         self._load_sheet_1_16(excel_path)
+        # Derive social_rent from CPI+1% lagged
+        self._derive_social_rent()
 
     def _load_sheet_1_7(self, excel_path: Path):
         """Load inflation metrics from sheet 1.7."""
@@ -121,6 +123,20 @@ class OBRForecast:
         col = self._find_column_by_header(df, "per cent change")
         if col is not None:
             self._data["house_prices"] = self._extract_annual_data(df, col)
+
+    def _derive_social_rent(self):
+        """Derive social rent as CPI+1% with one year lag."""
+        if "cpi" not in self._data:
+            return
+
+        social_rent = {}
+        cpi_data = self._data["cpi"]
+        for year in cpi_data:
+            # Social rent in year Y is based on CPI from year Y-1 + 1%
+            prev_year = year - 1
+            if prev_year in cpi_data:
+                social_rent[year] = cpi_data[prev_year] + 1.0
+        self._data["social_rent"] = social_rent
 
     def _find_column_by_header(
         self, df: pd.DataFrame, header_text: str

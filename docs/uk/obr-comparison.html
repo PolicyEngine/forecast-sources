@@ -80,7 +80,8 @@
             </optgroup>
             <optgroup label="Housing">
                 <option value="house_prices">House prices</option>
-                <option value="rent">Rent</option>
+                <option value="rent">Private rent</option>
+                <option value="social_rent">Social rent</option>
                 <option value="mortgage_interest">Mortgage interest</option>
             </optgroup>
         </select>
@@ -135,6 +136,12 @@
         november_2025: [2.94, 2.22, 2.79, 2.72, 2.57, 2.42],
         title: 'House price growth (%)',
         usage: '<strong>Used in PolicyEngine for:</strong> Stamp duty projections and property value calculations.'
+    },
+    social_rent: {
+        march_2025: [3.53, 4.21, 3.08, 2.99, 3.00, null],
+        november_2025: [3.53, 4.45, 3.48, 3.02, 3.04, 3.04],
+        title: 'Social rent growth (%)',
+        usage: '<strong>Used in PolicyEngine to uprate:</strong> <span class="example">Social housing rent</span>. Derived from CPI + 1% with a one year lag, following the government\'s social rent policy.'
     },
 };
 
