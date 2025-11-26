@@ -1,6 +1,8 @@
-# forecast-sources
+# official-forecast-vintages
 
-Extract and compare economic forecasts from official sources (OBR, CBO, etc.).
+Extract and compare different vintages of economic forecasts from official sources (OBR, CBO, etc.).
+
+A "vintage" refers to a specific release of a forecast - for example, the OBR's March 2025 Economic and Fiscal Outlook vs their November 2025 update. Comparing vintages helps track how official projections evolve over time.
 
 ## Installation
 
@@ -49,7 +51,8 @@ html = generate_obr_comparison_chart(
 - `cpih` - Consumer Price Index including Housing
 - `average_earnings` - Average weekly earnings growth
 - `mortgage_interest` - Mortgage interest payments growth
-- `rent` - Rent growth
+- `rent` - Private rent growth
+- `social_rent` - Social rent growth (derived from CPI+1% with one year lag)
 - `house_prices` - House price index growth
 
 ## Data sources
