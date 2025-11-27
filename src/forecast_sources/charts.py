@@ -322,7 +322,7 @@ def generate_obr_comparison_chart(
                 }},
                 legend: {{
                     orientation: 'h',
-                    y: -0.15,
+                    y: -0.2,
                     x: 0.5,
                     xanchor: 'center',
                     font: {{
@@ -330,7 +330,7 @@ def generate_obr_comparison_chart(
                         color: '#374151'
                     }}
                 }},
-                margin: {{ t: 50, b: 80, l: 50, r: 30 }},
+                margin: {{ t: 50, b: 100, l: 50, r: 30 }},
                 plot_bgcolor: 'white',
                 paper_bgcolor: 'white',
                 hovermode: 'x unified',
